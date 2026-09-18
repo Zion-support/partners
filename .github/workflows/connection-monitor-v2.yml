@@ -57,8 +57,14 @@ jobs:
           echo "health_score=$SCORE" >> "$GITHUB_OUTPUT"
           echo "Health Score: $SCORE%"
       - name: Notify Slack on degradation
-        if: ${{ fromJSON(steps.health.outputs.health_score || '0') < 80 && secrets.SLACK_WEBHOOK_URL != '' }}
+        if: ${{ fromJSON(steps.health.outputs.health_score || '0') < 80 }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
+          if [ -z "$SLACK_WEBHOOK_URL" ]; then
+            echo "::notice::SLACK_WEBHOOK_URL secret not set; skipping Slack notification"
+            exit 0
+          fi
           curl -fsS -X POST -H 'Content-type: application/json' \
             --data "{\"text\":\"Warning: Zion Composio Health: ${{ steps.health.outputs.health_score }}% — connections degraded\"}" \
-            "${{ secrets.SLACK_WEBHOOK_URL }}"
+            "$SLACK_WEBHOOK_URL"
