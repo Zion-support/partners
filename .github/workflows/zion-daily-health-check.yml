@@ -40,11 +40,17 @@ jobs:
           exit "$fail"
 
       - name: Setup Node
+        if: env.HAS_COMPOSIO_KEY == 'true'
         uses: actions/setup-node@v4
+        env:
+          HAS_COMPOSIO_KEY: ${{ secrets.COMPOSIO_API_KEY != '' }}
         with:
           node-version: 20
 
       - name: Install Composio SDK
+        if: env.HAS_COMPOSIO_KEY == 'true'
+        env:
+          HAS_COMPOSIO_KEY: ${{ secrets.COMPOSIO_API_KEY != '' }}
         run: npm install @composio/core
 
       - name: Check Composio connections
@@ -52,6 +58,11 @@ jobs:
         env:
           COMPOSIO_API_KEY: ${{ secrets.COMPOSIO_API_KEY }}
         run: |
+          if [ -z "${COMPOSIO_API_KEY:-}" ]; then
+            echo "::warning::COMPOSIO_API_KEY secret not set — skipping Composio connection check"
+            echo '{"skipped": true, "reason": "COMPOSIO_API_KEY not set"}' > composio-status.json
+            exit 0
+          fi
           cat > health.mjs <<'EOF'
           import { Composio } from '@composio/core';
           const composio = new Composio({ apiKey: process.env.COMPOSIO_API_KEY });
