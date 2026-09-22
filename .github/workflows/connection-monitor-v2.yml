@@ -38,14 +38,29 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 1
+
+      - name: Check Composio API key
+        id: keycheck
+        run: |
+          if [ -z "$COMPOSIO_API_KEY" ]; then
+            echo "::warning::COMPOSIO_API_KEY secret not set in this repo - skipping monitor. Add the secret (or an org-level secret) to enable."
+            echo "has_key=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_key=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - uses: actions/setup-node@v4
+        if: steps.keycheck.outputs.has_key == 'true'
         with:
           node-version: 20
       - name: Install Composio SDK
+        if: steps.keycheck.outputs.has_key == 'true'
         run: npm install @composio/core
       - name: Run Connection Monitor
+        if: steps.keycheck.outputs.has_key == 'true'
         run: node .github/scripts/composio/connection-monitor-v2.mjs
       - name: Check for degraded connections
+        if: steps.keycheck.outputs.has_key == 'true'
         id: health
         run: |
           if [ ! -f composio-connection-report.json ]; then
@@ -57,7 +72,7 @@ jobs:
           echo "health_score=$SCORE" >> "$GITHUB_OUTPUT"
           echo "Health Score: $SCORE%"
       - name: Notify Slack on degradation
-        if: ${{ fromJSON(steps.health.outputs.health_score || '0') < 80 }}
+        if: ${{ steps.keycheck.outputs.has_key == 'true' && fromJSON(steps.health.outputs.health_score || '0') < 80 }}
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
