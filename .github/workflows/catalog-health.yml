@@ -20,16 +20,13 @@ jobs:
           set -euo pipefail
           html=$(curl -fsSL https://ziontechgroup.com/)
           must=(
-            "Catálogo vivo"
-            "Diagnóstico rápido"
-            "Telegram"
-            "Discovery"
-            "CPA"
+            "Automação"
             "Agentes"
-            "Ferramentas"
-            "Academia"
+            "Managed IT"
+            "Discovery"
             "FinOps"
-            "WhatsApp"
+            "Assessment"
+            "Discovery $99"
           )
           fail=0
           for s in "${must[@]}"; do
@@ -59,17 +56,17 @@ jobs:
           routes=(
             https://ziontechgroup.com/
             https://ziontechgroup.com/services/
-            https://ziontechgroup.com/agents/
+            https://ziontechgroup.com/managed-it-services/
+            https://ziontechgroup.com/autonomous-ai-agents/
+            https://ziontechgroup.com/ai-consulting-services/
             https://ziontechgroup.com/plans/
             https://ziontechgroup.com/discovery/
-            https://ziontechgroup.com/booking/
-            https://ziontechgroup.com/cpa/
-            https://ziontechgroup.com/free-ai-it-tools/
-            https://ziontechgroup.com/academy/
-            https://ziontechgroup.com/blog/
-            https://ziontechgroup.com/telegram/
-            https://ziontechgroup.com/pricing/
+            https://ziontechgroup.com/ai-readiness-assessment/
             https://ziontechgroup.com/finops-consulting/
+            https://ziontechgroup.com/zion-app-network/
+            https://ziontechgroup.com/case-studies/
+            https://ziontechgroup.com/blog/
+            https://ziontechgroup.com/contact/
             https://ziontechgroup.com/assets/js/zion-catalog.js
           )
           for u in "${routes[@]}"; do
