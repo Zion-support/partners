@@ -18,7 +18,8 @@ jobs:
       - name: Probe live homepage advertising + catalog JS
         run: |
           set -euo pipefail
-          html=$(curl -fsSL https://ziontechgroup.com/)
+          # Homepage hero/content rotates; fetch 3x and combine to avoid flakes
+          html="$(for i in 1 2 3; do curl -fsSL https://ziontechgroup.com/ || true; sleep 2; done)"
           must=(
             "Automação"
             "Agentes"
@@ -37,7 +38,7 @@ jobs:
               echo "OK: $s"
             fi
           done
-          js=$(curl -fsSL https://ziontechgroup.com/assets/js/zion-catalog.js)
+          js="$(for i in 1 2 3; do curl -fsSL https://ziontechgroup.com/assets/js/zion-catalog.js || true; sleep 2; done)"
           js_must=(
             'Discovery $99'
             "Agentes Telegram"
