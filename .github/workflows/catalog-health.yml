@@ -31,7 +31,7 @@ jobs:
           )
           fail=0
           for s in "${must[@]}"; do
-            if ! printf '%s' "$html" | grep -Fq "$s"; then
+            if ! grep -Fq "$s" <<< "$html"; then
               echo "MISSING on homepage: $s"
               fail=1
             else
@@ -47,7 +47,7 @@ jobs:
             "finops-form"
           )
           for s in "${js_must[@]}"; do
-            if ! printf '%s' "$js" | grep -Fq "$s"; then
+            if ! grep -Fq "$s" <<< "$js"; then
               echo "MISSING in catalog JS: $s"
               fail=1
             else
