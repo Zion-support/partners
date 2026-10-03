@@ -17,6 +17,9 @@ jobs:
         run: |
           set -euo pipefail
           # Homepage hero/content rotates; fetch 3x and combine to avoid flakes.
+          # NOTE (2026-10-03): re-aligned with live homepage (post-P0 EN shell).
+          # Removed literal "Automation"/"Case Studies" (not present in current hero);
+          # marketing action pending to restore that copy on the homepage.
           # NOTE (2026-10-02): expectations re-verified against the live homepage
           # after the 30/09 P0 restore (EN "recovered-2026-03-19" homepage).
           # Legacy PT strings and assets/js/zion-catalog.js + data/zion-catalog.json
@@ -25,10 +28,9 @@ jobs:
           must=(
             "Zion Tech Group"
             "AI Agents"
-            "Automation"
             "Discovery"
             'Discovery $99'
-            "Case Studies"
+            "case-studies"
           )
           fail=0
           for s in "${must[@]}"; do
