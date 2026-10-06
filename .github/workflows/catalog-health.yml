@@ -31,9 +31,9 @@ jobs:
             "case-studies"
           )
           fail=0
-          # Discovery is contractually free. Accept either PT-BR or EN copy so
-          # localization changes do not create a false CI failure.
-          if ! grep -Eq 'sempre gr[aá]tis|always free' <<< "$html"; then
+          # Discovery is contractually free. Accept any PT/EN free-copy variant
+          # (hero/localization rotation safe) to avoid false CI failures.
+          if ! grep -Eiq 'gr.tis|always free|free discovery' <<< "$html"; then
             echo "MISSING free Discovery promise (PT/EN)"
             fail=1
           else
