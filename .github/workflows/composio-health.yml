@@ -3,6 +3,14 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '0 11 * * *'
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/composio-health.yml'
+
+permissions:
+  contents: read
 
 concurrency:
   group: composio-health
@@ -11,22 +19,35 @@ concurrency:
 jobs:
   health-check:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
     env:
       COMPOSIO_API_KEY: ${{ secrets.COMPOSIO_API_KEY }}
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Install Composio CLI
+      - name: Verify API key via Composio v3 connected accounts
+        shell: bash
         run: |
-          curl -fsSL https://composio.dev/install | bash
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          set -euo pipefail
+          if [ -z "${COMPOSIO_API_KEY:-}" ]; then
+            echo "::error::COMPOSIO_API_KEY secret is not set."
+            exit 1
+          fi
+          code=$(curl --silent --show-error --output /tmp/composio.json --write-out "%{http_code}" \
+            --header "X-API-Key: ${COMPOSIO_API_KEY}" \
+            "https://backend.composio.dev/api/v3/connected_accounts?statuses=ACTIVE&limit=1")
+          echo "Composio connected_accounts HTTP status: $code"
+          case "$code" in
+            2*) echo "Composio authentication succeeded." ;;
+            401|403)
+              echo "::error::Composio credential is invalid, expired, or unauthorized (HTTP $code)."
+              exit 1
+              ;;
+            *)
+              echo "::error::Composio health probe returned unexpected HTTP $code."
+              head -c 500 /tmp/composio.json || true
+              exit 1
+              ;;
+          esac
 
-      - run: composio whoami 2>&1 || echo "WHOAMI_FAILED"
-
-      - name: List Connections
-        run: |
-          echo "=== Connections ==="
-          composio connections list 2>&1
-
-      - run: echo "Done $(date -u)"
+      - name: Summary
+        if: always()
+        run: echo "Composio health check completed at $(date -u)"
